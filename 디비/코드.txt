@@ -1,0 +1,170 @@
+1. 년도 두자리 표기 안하면 년월일만 나옴
+시분초까지
+페이지사이즈 : 한페이지에 몇줄
+피드백 : 상태를 보여준다.
+
+| : \n과 같은 역할
+속성 가시화 COLUMN RELEASED HEADING '출시일'
+COLUMN NUM HEADING '품번' FORMAT 000000000 자릿수 맞춤
+COLUMN PRICE HEADING '가격' FORMAT 999,999,999 자리수 맞춤 X
+BREAK ON 중복된 것을 표기하지 않음 - 출시일, 제품명
+(사용자가 보기 편하게 하려고 한다)
+
+SELECT TO_CHAR(PRO_DATE,'YYYY/MM/DD') AS RELEASED
+//릴리즈를 가져옴 (프로를 릴리즈로) 
+Product.NAME AS PNAME
+ENROLL_DATE AS EDATE //일시 까지 입력하려고
+PRICE, STOCK_NUM 자체적으로 참고 가능 (AS 필요 없음)
+FROM SITE, PRODUCT //가져오는 테이블
+WHERE TO_CHAR(PRODUCT.PRO_DATE,'YYYY') = '&년도'
+//출시일에서 연도 뽑아서 문자형으로 바꿔줌 2017
+//& 연도 입력 2017
+//서로 비교해서 같은 것만 가져온다.
+AND SITE.NUM = PRODUCT.ENROLL_SITE
+// 테이블 조인
+//사이트 번호 비교 
+// 제휴사이트 등록순으로 가져오게 된다.
+// 3번 사이트 1 사이트로 가져올수 있으
+ORDER BY PRO_DATE
+// 출시일 기준으로 정렬 
+// asc 오름차순 (디폴트 값 안써줘도 된다.) 
+// desc 내림차순
+// 릴리즈드로 써도 가능
+
+TTITLE OFF //타이틀 이름 없앰
+CLEAR COLUMNS //콜롬 없앰
+CLEAR BREAK //브레이크 온 없앰
+
+AND RANK = '&등급'
+//개발할 때 밑에 있는 것을 위로 올려준다. 
+where RANK = '&등급'로 위로 올려주어야 했다.
+
+=> 특정연도를 검색해서 음향기기과 제휴사이트를 출시일 순서대로 정렬
+- 올해 출시된 음향기기를 사고 싶을때
+---------------------------------------------------------------------------------
+=> 스트리머 방송정보 : 어떤 등급에서 대해 어떤 스트리머가 
+	몇시간 몇번 몇명 언제 승급 현재등급
+COLUMN STIME HEADING '방송시간|합계' FORMAT 999,999,990.00
+//분을 위해서
+
+WITH STREAMER_INFO //가상테이블 생성
+스트리머 아이디 , 방송시간  
+END_T-START_T// 일단위로 나와서 마이크로 초버리고 시간.xx 로 보여짐
+COUNT(*) AS SNUMS //방송횟수를 센다 (스트리머 아이디 기준)
+VIEW_INFO // 시청하다 가상 테이블 
+	// 어떤 방송을 몇번 보았나 (방송번호기준)
+VIEWS // 어떤스트리머의 누적 시청자수 (스트리머 아이디)
+DECIDE_INFO
+// 예전 히스토리 검색 안되게 하기 위해 따로 분리함 
+DENSE_RANK //가장 최근의 정보 한줄을 가져옴
+MAX(DECIDE_DATE) KEEP DENSE_RANK//가장 최근이 DECIDE_DATE
+MAX(RANK_CATEGORY) KEEP (DENSE_RANK //가장 최근 등급
+SELECT STREAMER.STREAMER_ID AS SID, 
+NVL(STIMES,0) AS STIME
+//누적 방송 시간 없으면 0
+,NVL(SNUMS,0) AS SNUM,
+//누적 방송 횟수 0
+ NVL(VNUM,0) AS FVNUM,
+//누적 시청자 수 0
+DDATE, //최근 등급 결시 일시 
+ NVL(RANK,'등급정보가 없습니다.')  AS RANK
+FROM  STREAMER // 방송 한적이 없을 때 (모든 스트리머를 위해)
+
+WHERE STREAMER.STREAMER_ID = STREAMER_INFO.STREAMER_ID(+)
+// (+) : 아우터 조인 - 방송안한 스트리머의 정보 추가 (STREAMER_INFO에 없으니께)
+
+ORDER BY DDATE DESC, STIME
+//덜 방송하고 결정일자가 빠른 순으로 정렬
+
+------------------------------------------------------------------------------
+
+=> 어떤 회원이 음향기기를 누적 금액을 조회하고 일정 금액을 기준으로
+이상인 사람을 보여준다.
+=> 누적금액 이상 회원을 위한 이벤트 준비
+
+with 가상테이블
+----------------------------------------------------------------------------
+ => 음원 재생에 있어 통계정보로 공유하기 위함
+
+BREAK ON SGID //가수 아이디가 겹치면 아래 빈칸
+PLAYM //남자 가상
+PLTotal // 가상테이블 :  LIST_NUM가 음원번호
+MONTHS_BETWEEN(SYSDATE,MUSICAPP_USER.BORN_DATE)/12
+// 몇년 차이나는지
+(+) 재생, 플레이리스트에 넣은 거 : 가수가 음원을 안올려놓은 것을 대비해서
+// 빈칸 넣고 검색하면 업로드 안한 가수 아이디를 출력한다.
+
+가수아이디랑 음원번호 오름차순
+ -----------------------------------------------------------------------------
+
+=> 회원에게 음원, 가수, 음향기기를 추천하기 위해서
+=> 회원이 좋아하는 장르 파악
+
+BREAK ON USID ON NAME
+//회원 아이디 회원 이름이 같으면 표시 안함, 중복방지
+
+GENRES //가상테이블
+SELECT DISTINCT GENRE // 음원장르를 종류를 중복되지 않게 추출
+CPNUM //가상테이블 
+//회원이 어떤 장르를 몇번 들었는지
+GROUP BY USER_ID, SOUNDTRACK.GENRE// 기준
+NVL(PNUM,0) AS PNUM// 재생한게 없으면 0
+ORDER BY USID, PNUM DESC // 유저 아이디 오름차순, 재생 횟수 내림차순
+//원래는 다 나오게 하려다가 회원아이디를 검색하게 돼서 필요 없는 부분 (USID)
+-----------------------------------------------------------------------------------------
+
+=> 제품명 검색시 제품을 등록한 제휴사이트 목록 출력
+BREAK ON PNAME ON CATEGORY //겹치는 게 있으면 첫째 줄빼고 밑에부터 안보이게
+WHERE PRODUCT.NAME LIKE '%&제품명%' //%를 쓸때 사용
+//제품명에 일부만 검색해도 검색 될 수 있도록
+//%--- : ~~~브릿즈
+//-----% : 브짓즈~~
+//%----% : ~~브릿즈~~
+ORDER BY PNAME, PRICE //제품명 , 가격
+//소비자는 대부분 풀네임을 모름
+
+-----------------------------------------------------------------
+
+=> 특정 연도 입력하면 그 해에 돈을 벌었던 스트리머들의 목록과 총수입, 수수료 비율, 순수익
+BREAK ON MON //월 겹치면 안나오게
+
+YINFO// 가상테이블
+YIN//년도를 입력 받아서 
+FROM DUAL //시스템 전체에서 가져온다. 컴퓨터의 메모리 같은 느낌
+DECIDE_INFO //가상테이블
+MAX(DECIDE_DATE) KEEP (DENSE_RANK LAST ORDER BY DECIDE_DATE) 
+AS DDATE
+//  가장 최근의 DECIDE_DATE가 속한 행을 가져와서 DECIDE_DATE를 뽑아 낸다.
+MAX(RANK_CATEGORY) KEEP (DENSE_RANK LAST ORDER BY DECIDE_DATE)
+AS RANK
+//  가장 최근의 DECIDE_DATE가 속한 행을 가져와서 DENSE_RANK를 뽑아 낸다.
+WHERE TO_CHAR(DECIDE_DATE,'YYYY') <= YIN
+//2014년에 승급함, 2018 입력
+TO_CHAR(DONATE_DATE,'MM')
+// 월만 가져옴
+
+---------------------------------------------------------------
+=> 년도를 두개 입력 후, 아이디 까지 ~부터 ~까지 : 회원이 월정액 가입을 한 히스토리
+
+BREAK ON NAME ON YMON 
+// 이름, 년월
+// 그때 바로 바꿀수 있다.
+AND MONTHLY_CATEGORY = CATEGORY
+//음원 월정액 카테고리와 가입하다의 카데고리
+
+ORDER BY YMON
+//년월 오름차순
+------------------------------------------------------------------
+=> 회원 아이디, 정렬기준 입력받고 회원 플레이 리스트를 출력
+=> 정렬기준을 사용자에게 입력받기 때문에 컬럼을 한글로 함
+
+
+
+
+
+
+
+
+
+
+ 
